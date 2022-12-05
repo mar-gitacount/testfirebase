@@ -23,6 +23,7 @@ class Model: ObservableObject {
     @Published private(set) var message_prev:String = "プレビュー"
     /** 空にするとエラーになる。*/
     @Published private(set) var req_colection = "message"
+    
     /**引数にてchildを渡すような形,引数要引数*/
     /**この関数はあくまでも単体のレコードを渡すクラスメソッドなので複雑な条件の場合は他のメソッドで規定する。 */
     /**https://qiita.com/chocoyama/items/a588c3569b8dd89cd223 */
