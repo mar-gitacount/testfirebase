@@ -82,6 +82,8 @@ struct Userpage :View{
         }
     }
 }
+/**新規登録画面 */
+/**UserCheck画面からモーダル表示する。UserCheck内にモーダルボタン設置する。 */
 /**ユーザーチェックしてtrueならユーザーページに遷移する。ー */
 /**通常ログインとアップルログインで処理を分ける。 */
 struct UserCheck :View {
@@ -109,6 +111,7 @@ struct UserCheck :View {
     @State private var test = "test"
     @AppStorage("isOnbord") var isOnbord: Bool = true
     @AppStorage("count_key") var counter = 0
+    //@State private var UsersignupModalShow:Bool = false
     //ここでログインフラグ判定ステート=toggleで変更監視している。
     /**ここをデフォでfalseを代入していると延々とビューがコントロールできない。 */
     @State private var user_flg : Bool = false
@@ -234,7 +237,7 @@ struct UserCheck :View {
                     /**明日はここから */
                     //let userID = Auth.auth().currentUser!.uid
                     
-                    Text("会員登録はこちらから").font(.body).frame(width:350,height: 50).background(Color.black)
+                    Text("会員さんはこちらから").font(.body).frame(width:350,height: 50).background(Color.black)
                     //isPresented=他の画面から呼ばれた場合の処理。
                 })//.alert(isPresented: $isShowAlert, content:{Alert(title: Text($alertMessage))}).padding().cornerRadius(60)
                 .accentColor(Color.white)
@@ -253,8 +256,20 @@ struct UserCheck :View {
                         .cornerRadius(16)
                 })
                 .padding()
+                Button(action: {
+                    self.isShowAlert.toggle()
+                }){
+                    Text("会員登録の方はこちら")
+                }.sheet(isPresented: $isShowAlert){
+                    UserSignupModalView()
+                }
             }
         }
+    }
+}
+struct UserSignupModalView: View{
+    var body: some View{
+        Text("ユーザー情報を入力ください。")
     }
 }
 /**ニュースのメインビュー */
