@@ -111,7 +111,7 @@ struct UserCheck :View {
     @State private var test = "test"
     @AppStorage("isOnbord") var isOnbord: Bool = true
     @AppStorage("count_key") var counter = 0
-    //@State private var UsersignupModalShow:Bool = false
+    @State private var UsersignupModalShow:Bool = false
     //ここでログインフラグ判定ステート=toggleで変更監視している。
     /**ここをデフォでfalseを代入していると延々とビューがコントロールできない。 */
     @State private var user_flg : Bool = false
@@ -257,10 +257,10 @@ struct UserCheck :View {
                 })
                 .padding()
                 Button(action: {
-                    self.isShowAlert.toggle()
+                    self.UsersignupModalShow.toggle()
                 }){
                     Text("会員登録の方はこちら")
-                }.sheet(isPresented: $isShowAlert){
+                }.sheet(isPresented: $UsersignupModalShow){
                     UserSignupModalView()
                 }
             }
