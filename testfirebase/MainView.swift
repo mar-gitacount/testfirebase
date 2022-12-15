@@ -76,7 +76,7 @@ struct MaintestView: View {
 //                    //self.subViewItems.append(SubtestViewItem())
 //                    //UserView().removeFromSuperview()
 //                }
-//                
+//
 //            }
 //            ForEach(0..<subViewItems.count, id: \.self) { index in
 //                SubView(item: subViewItems[index])
@@ -131,9 +131,9 @@ final class Change_User_flg{
     static var shared = Change_User_flg()
     var tabViewChange = Tab_View_change()
     var changePage = Userpage()
-    // ユーザID
-      var id: String = "ll"
-      // ユーザ名
+    // ユーザID=Appstorage
+      var id: String = ""
+      // ユーザ名=Appstorage
       var name: String = ""
     init(id:String,name:String){
         self.id = id
@@ -271,6 +271,7 @@ struct MainView: View {
     @State private var ViewStandard = View_Standard()
     @State private var Textarray = View_Standard.init(main_text_array:)
     @State private var userviewflg = false
+   
     var rink = "メインのプロパティ"
     /**管理下する事でタブを動的に切り替えるようにする。
      呼び出し先でフラグを判定し、タブの内容を切り替える。
@@ -281,15 +282,25 @@ struct MainView: View {
     @State private var Viewcontroll = MemberView()
     @State private var selectedTag = 1
     @State var flgNo = 1
+    @State var userflg:Bool = false
+    @State var checkid = Change_User_flg.shared.id
+
     /**以下はidフラグ */
     @State private var change_user_flg = Change_User_flg.shared.id
     @State private var changetab = Change_User_flg.shared
     //@State private var Usercheck  = UserCheck(flgNo:$flgNo)
 //    @State private var tab = Tab_Insert.shard.usertab
     var test = "テスト"
+  
     //@ObservedObject var viewModel = Change_User_Flg(UserViewChangeFlg:true)
     //@State private var view = viewModel.(UserViewChangeFlg:true)
     var body: some View {
+        
+//        if(checkid){
+//            userflg = true
+//        }
+        
+        //self.id == "" ? self.flgNo = 2 : self.flgNo = 1
         //testAnyView()
         //MaintestView()
         /**リスト一覧 */

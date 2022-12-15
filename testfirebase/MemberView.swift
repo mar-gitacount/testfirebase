@@ -89,8 +89,10 @@ struct Userpage :View{
 struct UserCheck :View {
     let context = LAContext()
     //@State private var testmain = MainView()
-    @State var maintestview = MaintestView()
+    //@State var maintestview = MaintestView()
+    
     @Binding var flgNo: Int
+    //@Binding var checkid: String
     @ObservedObject var viewModel = Model()
     @State private var signInWithAppleObject = SignInWithAppleObject()
     @State private var email: String = "ichikawa.contact@gmail.com"
@@ -106,7 +108,7 @@ struct UserCheck :View {
     @State private var password_editting = false
     /**以下でタブビューをコントロールできるか検証 */
     @State private var change = Change_User_flg.shared
-    //@State private var id = change.id
+    @State private var useremptycheck = Change_User_flg.shared.id
 
     @State private var test = "test"
     @AppStorage("isOnbord") var isOnbord: Bool = true
@@ -117,9 +119,11 @@ struct UserCheck :View {
     @State private var user_flg : Bool = false
     //let usertest = Auth_user_get_data(name:"name")
     var body: some View {
-        if(flgNo == 2){
+        if(flgNo==2){
             VStack{
-                Text("テストユーザー")
+                //ユーザーストレージがあればtrue
+                //falseにした場合、
+                Text(self.useremptycheck)
                 Button("ログアウト",action:{
                     self.flgNo = 1
                 })
@@ -208,17 +212,18 @@ struct UserCheck :View {
                                             self.email_error = "あるよ"
                                             change.addValue()
                                             change.id = "id"
-                                            self.flgNo=2
+                                            self.flgNo = 2
+                                            //self.checkid="登録id"
                                             self.test = "test2"
                                             //change.id = self.testmain.rink
                                             //Change_User_flg.addValue()
                                             //self.email_error = change_user_flg.id
                                             /**userクラスをtrueにする。*/
                                             //user_flg.toggle()
-                                            NavigationLink(destination: UserView(),
-                                                           isActive: $user_flg) {
-                                                EmptyView()
-                                            }
+//                                            NavigationLink(destination: UserView(),
+//                                                           isActive: $user_flg) {
+//                                                EmptyView()
+//                                            }
                                             
                                             //user_flg.toggle()
                                         } else {
