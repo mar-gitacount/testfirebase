@@ -114,6 +114,7 @@ struct UserCheck :View {
     @AppStorage("isOnbord") var isOnbord: Bool = true
     @AppStorage("count_key") var counter = 0
     @State private var UsersignupModalShow:Bool = false
+    @FocusState var focusstate:Bool
     //ここでログインフラグ判定ステート=toggleで変更監視している。
     /**ここをデフォでfalseを代入していると延々とビューがコントロールできない。 */
     @State private var user_flg : Bool = false
@@ -149,6 +150,7 @@ struct UserCheck :View {
                     .padding()// 余白を追加
                 // 編集フラグがONの時に枠に影を付ける
                     .shadow(color: email_edittiig ? .blue : .clear, radius: 3)
+                    .focused($focusstate)
                 Text(password_error).foregroundColor(Color.red)
                 TextField("Password", text: self.$password,onEditingChanged: { begin in
                     /// 入力開始処理
@@ -160,6 +162,7 @@ struct UserCheck :View {
                         self.password_editting = false   // 編集フラグをオフ
                     }
                 }).keyboardType(.default).autocapitalization(.none).textFieldStyle(RoundedBorderTextFieldStyle()).padding() .shadow(color: password_editting ? .blue : .clear, radius: 3)
+                    .focused($focusstate)
                 //ログイン方法はアップルログインと、通常のログインを実装する。
                 //falseが帰ってきた場合、登録画面にリダイレクトする。
                 //入力値を制御す
@@ -187,7 +190,7 @@ struct UserCheck :View {
                                 //self.alertMessage = error?.localizedDescription ?? ""
                                 self.alertMessage = "Error"
                                 self.isShowAlert = true
-                                
+                                //self.UsersignupModalShow.toggle()
                             }else{
                                 //認証が成功した時の処理を書く
                                 //ログイン成功したら、それにひもづくデータを返す
@@ -241,11 +244,12 @@ struct UserCheck :View {
                 }, label: {
                     /**明日はここから */
                     //let userID = Auth.auth().currentUser!.uid
-                    
                     Text("会員さんはこちらから").font(.body).frame(width:350,height: 50).background(Color.black)
                     //isPresented=他の画面から呼ばれた場合の処理。
-                })//.alert(isPresented: $isShowAlert, content:{Alert(title: Text($alertMessage))}).padding().cornerRadius(60)
+                })//.sheet(isPresented:$UsersignupModalShow){UserSignupModalView(username: name , email: email,message: email_error)}
+                //.alert(isPresented: $isShowAlert, content:{Alert(title: Text($alertMessage))}).padding().cornerRadius(60)
                 .accentColor(Color.white)
+                
                 Button(action: {
                     signInWithAppleObject.signInWithApple()
                     /**Appストレージに入れ込む */
@@ -266,15 +270,81 @@ struct UserCheck :View {
                 }){
                     Text("会員登録の方はこちら")
                 }.sheet(isPresented: $UsersignupModalShow){
-                    UserSignupModalView()
+                    UserSignupModalView(username: name , email: email ,password:password, message: "")
+                }
+            }.toolbar {
+                ToolbarItemGroup(placement: .keyboard){
+                    Spacer()
+                    Button("閉じる"){
+                        focusstate = false
+                    }
                 }
             }
         }
     }
 }
 struct UserSignupModalView: View{
+    //ここでユーザー登録があれば→登録があります!!こちらでログインしますか?と聞く
+    //ログインビューから名前やemailの情報が渡されるので、それをテキストフィールドに入力する。
+    //渡された値をテキストフィールドモデルに渡して入力。
+    //テキストフィールドモデル判定はジャッジユーザークラスで判定させる。
+    //Buttonactionでジャッジユーザークラスを呼び出す。
+    //呼び出してジャッジユーザークラスはユーザーデータを精査してtrueならページ遷移。appstrageに情報を格納する。
+    @State public var username:String = ""
+    @State public var email:String = ""
+    @State public var password:String = ""
+    @FocusState var focusstate:Bool
+    var message:String
+    var texts = TextProtocolMakeValue(ItemArray: ["email","name"])
+    //テキストフィールドの値
+    //テキストフィールドの準拠プロトコル雛形作成関数。引数は文字列で受け取り、帰値は準拠プロトコル。
+    //ユーザーが入力した値を第二引数に代入したい。
+    var textvalue = [
+        Textfieldprotcol(TextFieldtext: "email"),
+        Textfieldprotcol(TextFieldtext: "name")
+    ]
+    var textfields = TextFieldClass()
+//        ])
     var body: some View{
-        Text("ユーザー情報を入力ください。")
+        VStack{
+            TextField("メールアドレスを入力してください。",text:$email,onEditingChanged: {
+                begin in
+                /// 入力開始処理
+                if begin {
+                    //self.email_edittiig = true    // 編集フラグをオン
+                    self.email = ""       // メッセージをクリア
+                    /// 入力終了処理
+                } else {
+                    //self.email_edittiig = false   // 編集フラグをオフ
+                }
+            }).autocapitalization(.none).textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .focused($focusstate)
+            SecureField("パスワードを入力してください。",text:$password).autocapitalization(.none).textFieldStyle(RoundedBorderTextFieldStyle()).padding()
+                .focused($focusstate)
+            
+            //textfields.view(textvalues: textvalue)
+            Button(action:{
+                if(self.email==""){
+                    
+                }else if(self.password==""){}
+                else{
+                    Auth.auth().createUser(withEmail:self.email,password:self.password){
+                        authResult,error in
+                        print(authResult)
+                    }
+                }
+            },label:{
+                Text("新規登録")
+            })
+        }.toolbar {
+            ToolbarItemGroup(placement: .keyboard){
+                Spacer()
+                Button("閉じる"){
+                    focusstate = false
+                }
+            }
+        }
     }
 }
 /**ニュースのメインビュー */
@@ -295,3 +365,117 @@ struct MemberView_Previews: PreviewProvider {
         MemberView().environmentObject(Model())
     }
 }
+
+//-----------------------------------
+//ここからテキストフィールドの大元を作るので完成次第不要なクラスなどは削除する。
+class TextFieldClass {
+    var email:String
+    var name:String
+    var textfieldcounts:Int
+    //@Stateにして、即時関数にする?
+    var textfieldvalues:[Textfieldprotcol]
+    //static let shared = TextFieldClass()
+    //ここをインスタンス時に設定できるようにする。
+    init(){
+        //self.textfieldcounts = 1
+        //self.view()
+        self.email = ""
+        self.name = ""
+        self.textfieldcounts = 1
+        self.textfieldvalues = [Textfieldprotcol(TextFieldtext:"email")]
+        
+    }
+    func view (textvalues:[Textfieldprotcol])->TextfieldModel{
+        return TextfieldModel(texts:textvalues)
+
+    }
+    //引数は配列で受け取る。
+    func textviewreturn(textvalueArray:[String])->TextfieldModel{
+        let textvalueArrayChangeIsTextFiledprotocolvalue:[Textfieldprotcol]
+        let texttest = "テスト"
+        textvalueArrayChangeIsTextFiledprotocolvalue = [Textfieldprotcol(TextFieldtext:texttest)]
+        return TextfieldModel(texts:textvalueArrayChangeIsTextFiledprotocolvalue)
+    }
+//    init(){
+//        self.email = email
+//        self.name = name
+//    }
+}
+//func textreturn()->TextFieldClass{
+//    return TextFieldClass()
+//}
+
+//テキストフィールドの準拠プロトコルを用意する。
+//ここでルール化する。
+struct Textfieldprotcol: Identifiable{
+    let id = UUID()
+    let TextFieldtext:String
+    //let TextFieldValue:String
+//    do {
+//        try  let TextFieldValue:String
+//    } catch {
+//        TextFieldtext = ""
+//    }
+    //let TextFieldArray:[String]
+}
+
+//Idenfifiablearryappendテスト
+//テスト後消去する。
+struct textarray: Identifiable{
+    let id = UUID()
+    let array:[String:String]
+}
+
+struct testarrayModal: View{
+    //var testarrayvalue:[textarray(array:["t","t"])]
+    
+    let apple = "apple"
+    var body: some View{
+        Text("テストArray!!")
+        
+    }
+}
+//呼び出し元の値によってテキストフィールドの表示が変わる。
+struct TextfieldModel: View{
+    var texts:[Textfieldprotcol]
+    //var usertext:[String]
+    //Foreachで準拠プロトコルをループさせ、その中の連想配列を呼び出す。
+    @State var text = ""
+    @State private var textfieldindex:Int = 1
+    @State private var UserInputtextArray = ["test","test2"]
+    //self.UserInputtextArray.append("ichikawa")
+    //UserInputtextArray.append(contentsOf : ["w"])
+    var body: some View{
+        //TextField(self.boxmessage, text:self.$text)
+        //textsの長さだけfor文を回す。
+        //Text(UserInputtextArray[1])
+        //Spacer()
+        ForEach(UserInputtextArray, id: \.self) { item in
+                        Text(item)
+                            .padding()
+                    }
+        ForEach(texts) {t in
+            //配列が存在しない時のためにエラーハンドリングする。
+            TextField(t.TextFieldtext,text:$UserInputtextArray[0])
+           
+        }
+//        Button(action:{
+//        })
+    }
+}
+
+func TextvalueChenck(TexfFieldCheck:[Textfieldprotcol]){
+    
+}
+//この関数を呼び出すだけで、テキストフィールドに必要なアイテムが帰ってくる。
+func TextProtocolMakeValue(ItemArray:[String])->[Textfieldprotcol]{
+    let text = [Textfieldprotcol(TextFieldtext:"email")]
+    let Items:[Textfieldprotcol]
+    //Items.append([Textfieldprotcol(TextFieldtext:"t")])
+    return text
+}
+
+func signincheck(){
+    
+}
+//-----------------------------------
