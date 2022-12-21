@@ -96,8 +96,6 @@ struct SubView: View {
     
     var body: some View {
             UserView()
-        
-        
     }
 }
 
